@@ -14,3 +14,6 @@ path = "src/bin/main.rs"
 
 [dependencies]
 gnucash-sys = { path = ".." }
+
+[build-dependencies]
+dotenvy = "0.15"

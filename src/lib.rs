@@ -85,7 +85,18 @@
 ///
 /// These bindings are automatically generated from the GnuCash C headers.
 /// Most users should prefer the safe wrapper types instead.
+#[allow(
+    clippy::all,
+    unpredictable_function_pointer_comparisons,
+    unnecessary_transmutes,
+    rustdoc::broken_intra_doc_links,
+    rustdoc::invalid_html_tags,
+    rustdoc::bare_urls
+)]
 pub mod ffi {
+    #[cfg(docsrs)]
+    include!("bindings_generated.rs");
+    #[cfg(not(docsrs))]
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
 
@@ -113,6 +124,12 @@ pub mod split;
 /// Safe wrapper for QofSession.
 pub mod session;
 
+/// Safe wrappers for Price and PriceDB.
+pub mod price;
+
+/// Safe wrappers for business entities (Customer, Vendor, Invoice, etc.).
+pub mod business;
+
 // Re-export main types at crate root
 pub use account::{Account, GNCAccountType};
 pub use book::Book;
@@ -128,3 +145,13 @@ pub use session::{init_engine, is_engine_initialized, QofBackendError, Session, 
 // Re-export reconcile and txn_type constants
 pub use split::reconcile;
 pub use transaction::txn_type;
+
+// Re-export price types
+pub use price::{Price, PriceDB, PriceSource};
+
+// Re-export business module
+pub use business::{
+    Address, BillTerm, Customer, Employee, Entry, GncAmountType, GncBillTermType, GncDiscountHow,
+    GncEntryPaymentType, GncInvoiceType, GncTaxIncluded, Invoice, Job, Owner, OwnerType, TaxTable,
+    TaxTableEntry, Vendor,
+};

@@ -21,3 +21,6 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 bindgen = "0.72"
 pkg-config = "0.3"
 dotenvy = "0.15"
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]

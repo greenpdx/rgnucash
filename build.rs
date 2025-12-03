@@ -2,6 +2,11 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    // Skip build script on docs.rs - we use pre-generated bindings
+    if env::var("DOCS_RS").is_ok() {
+        return;
+    }
+
     // Load .env file if present
     let _ = dotenvy::dotenv();
 
