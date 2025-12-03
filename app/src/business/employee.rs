@@ -11,6 +11,7 @@ use super::{Address, Owner};
 /// An employee entity.
 pub struct Employee {
     ptr: NonNull<ffi::GncEmployee>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

@@ -11,6 +11,7 @@ use super::{Address, Owner};
 /// A vendor/supplier entity.
 pub struct Vendor {
     ptr: NonNull<ffi::GncVendor>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

@@ -11,6 +11,7 @@ use super::{Invoice, TaxTable};
 /// A line item in an invoice or bill.
 pub struct Entry {
     ptr: NonNull<ffi::GncEntry>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

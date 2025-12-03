@@ -9,6 +9,7 @@ use gnucash_sys::Book;
 /// A mailing address.
 pub struct Address {
     ptr: NonNull<ffi::GncAddress>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

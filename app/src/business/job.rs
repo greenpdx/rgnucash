@@ -11,6 +11,7 @@ use super::Owner;
 /// A job entity linked to a customer.
 pub struct Job {
     ptr: NonNull<ffi::GncJob>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

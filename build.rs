@@ -185,7 +185,9 @@ fn main() {
         .derive_eq(true)
         .derive_hash(true)
         // Rust 2024 compatibility
-        .wrap_unsafe_ops(true);
+        .wrap_unsafe_ops(true)
+        // Disable doc comments to avoid doctest failures from C code examples
+        .generate_comments(false);
 
     // Add glib include paths
     for path in &glib.include_paths {

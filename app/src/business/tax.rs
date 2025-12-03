@@ -11,6 +11,7 @@ pub use ffi::GncAmountType as AmountType;
 /// A tax rate table.
 pub struct TaxTable {
     ptr: NonNull<ffi::GncTaxTable>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

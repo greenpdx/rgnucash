@@ -13,6 +13,7 @@ pub use ffi::GncInvoiceType as InvoiceType;
 /// An invoice or bill.
 pub struct Invoice {
     ptr: NonNull<ffi::GncInvoice>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

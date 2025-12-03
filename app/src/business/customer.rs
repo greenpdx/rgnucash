@@ -11,6 +11,7 @@ use super::{Address, Owner};
 /// A customer entity.
 pub struct Customer {
     ptr: NonNull<ffi::GncCustomer>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

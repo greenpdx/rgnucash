@@ -11,6 +11,7 @@ pub use ffi::GncBillTermType as BillTermType;
 /// Payment terms for invoices.
 pub struct BillTerm {
     ptr: NonNull<ffi::GncBillTerm>,
+    #[allow(dead_code)]
     owned: bool,
 }
 

@@ -5,7 +5,7 @@ use std::ptr::NonNull;
 
 use crate::ffi;
 use crate::iter::TransactionSplits;
-use crate::{Book, Guid, Numeric};
+use crate::{Account, Book, Guid, Numeric, Split};
 
 /// Transaction type constants.
 pub mod txn_type {
@@ -288,8 +288,8 @@ impl Transaction {
     }
 
     /// Returns the index of a split in this transaction.
-    pub fn get_split_index(&self, split: *const ffi::Split) -> i32 {
-        unsafe { ffi::xaccTransGetSplitIndex(self.ptr.as_ptr(), split) }
+    pub fn get_split_index(&self, split: &Split) -> i32 {
+        unsafe { ffi::xaccTransGetSplitIndex(self.ptr.as_ptr(), split.as_ptr()) }
     }
 
     /// Sorts the splits in the transaction (debits first, then credits).
@@ -316,13 +316,13 @@ impl Transaction {
     }
 
     /// Returns the total value applied to a specific account.
-    pub fn account_value(&self, account: *const ffi::Account) -> Numeric {
-        unsafe { ffi::xaccTransGetAccountValue(self.ptr.as_ptr(), account).into() }
+    pub fn account_value(&self, account: &Account) -> Numeric {
+        unsafe { ffi::xaccTransGetAccountValue(self.ptr.as_ptr(), account.as_ptr()).into() }
     }
 
     /// Returns the total amount (in account commodity) for a specific account.
-    pub fn account_amount(&self, account: *const ffi::Account) -> Numeric {
-        unsafe { ffi::xaccTransGetAccountAmount(self.ptr.as_ptr(), account).into() }
+    pub fn account_amount(&self, account: &Account) -> Numeric {
+        unsafe { ffi::xaccTransGetAccountAmount(self.ptr.as_ptr(), account.as_ptr()).into() }
     }
 
     // ==================== Voiding ====================
