@@ -11,6 +11,22 @@ use serde::{Deserialize, Serialize};
 pub const GUID_ENCODING_LENGTH: usize = 32;
 
 /// A 128-bit globally unique identifier.
+///
+/// # Examples
+///
+/// ```ignore
+/// use gnucash_sys::Guid;
+///
+/// // Create a new random GUID
+/// let guid = Guid::new();
+/// println!("GUID: {}", guid);
+///
+/// // Parse from hex string
+/// let parsed = Guid::parse("12345678901234567890123456789012").unwrap();
+///
+/// // Check for null GUID
+/// assert!(!guid.is_null());
+/// ```
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct Guid(pub(crate) ffi::GncGUID);
@@ -99,6 +115,27 @@ impl From<Guid> for ffi::GncGUID {
 }
 
 /// A rational number with 64-bit numerator and denominator.
+///
+/// Used for precise financial calculations without floating-point rounding errors.
+///
+/// # Examples
+///
+/// ```
+/// use gnucash_sys::Numeric;
+///
+/// // Create $100.00 (10000 cents / 100)
+/// let amount = Numeric::new(10000, 100);
+/// assert_eq!(amount.to_f64(), 100.0);
+///
+/// // Create from integer
+/// let whole: Numeric = 42i64.into();
+/// assert_eq!(whole.num(), 42);
+/// assert_eq!(whole.denom(), 1);
+///
+/// // Negate a value
+/// let neg = -amount;
+/// assert!(neg.is_negative());
+/// ```
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(transparent)]
 pub struct Numeric(pub(crate) ffi::gnc_numeric);

@@ -4,10 +4,13 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 description = "Extended functionality for gnucash-sys (business entities, queries, builders)"
-keywords = ["gnucash", "accounting", "finance", "invoice", "business"]
-categories = ["finance"]
+authors = ["Shaun Savage <savages@crmep.cr>"]
+homepage = "https://github.com/user/gnucash-sys"
+documentation = "https://docs.rs/gnucash-ext"
 repository = "https://github.com/user/gnucash-sys"
 readme = "README.md"
+keywords = ["gnucash", "accounting", "finance", "invoice", "business"]
+categories = ["finance"]
 
 [lib]
 path = "src/lib.rs"

@@ -164,6 +164,20 @@ impl std::fmt::Debug for Book {
     }
 }
 
+impl PartialEq for Book {
+    fn eq(&self, other: &Self) -> bool {
+        self.guid() == other.guid()
+    }
+}
+
+impl Eq for Book {}
+
+impl std::hash::Hash for Book {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.guid().hash(state);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

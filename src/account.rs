@@ -173,30 +173,50 @@ impl Account {
     // ==================== Setters ====================
 
     /// Sets the account's name.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `name` contains a null byte.
     pub fn set_name(&self, name: &str) {
         let c_name = CString::new(name).unwrap();
         unsafe { ffi::xaccAccountSetName(self.ptr.as_ptr(), c_name.as_ptr()) }
     }
 
     /// Sets the account's code.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `code` contains a null byte.
     pub fn set_code(&self, code: &str) {
         let c_code = CString::new(code).unwrap();
         unsafe { ffi::xaccAccountSetCode(self.ptr.as_ptr(), c_code.as_ptr()) }
     }
 
     /// Sets the account's description.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `desc` contains a null byte.
     pub fn set_description(&self, desc: &str) {
         let c_desc = CString::new(desc).unwrap();
         unsafe { ffi::xaccAccountSetDescription(self.ptr.as_ptr(), c_desc.as_ptr()) }
     }
 
     /// Sets the account's notes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `notes` contains a null byte.
     pub fn set_notes(&self, notes: &str) {
         let c_notes = CString::new(notes).unwrap();
         unsafe { ffi::xaccAccountSetNotes(self.ptr.as_ptr(), c_notes.as_ptr()) }
     }
 
     /// Sets the account's color.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `color` contains a null byte.
     pub fn set_color(&self, color: &str) {
         let c_color = CString::new(color).unwrap();
         unsafe { ffi::xaccAccountSetColor(self.ptr.as_ptr(), c_color.as_ptr()) }
@@ -393,6 +413,20 @@ impl std::fmt::Debug for Account {
             .field("type", &self.account_type())
             .field("balance", &self.balance())
             .finish()
+    }
+}
+
+impl PartialEq for Account {
+    fn eq(&self, other: &Self) -> bool {
+        self.guid() == other.guid()
+    }
+}
+
+impl Eq for Account {}
+
+impl std::hash::Hash for Account {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.guid().hash(state);
     }
 }
 

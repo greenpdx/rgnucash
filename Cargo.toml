@@ -8,10 +8,13 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 description = "FFI bindings to libgnucash engine"
-keywords = ["gnucash", "accounting", "finance", "ffi", "bindings"]
-categories = ["external-ffi-bindings", "finance"]
+authors = ["Shaun Savage <savages@crmep.cr>"]
+homepage = "https://github.com/user/gnucash-sys"
+documentation = "https://docs.rs/gnucash-sys"
 repository = "https://github.com/user/gnucash-sys"
 readme = "README.md"
+keywords = ["gnucash", "accounting", "finance", "ffi", "bindings"]
+categories = ["external-ffi-bindings", "finance"]
 links = "gnucash"
 
 [features]

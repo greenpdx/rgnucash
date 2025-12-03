@@ -124,6 +124,10 @@ impl Split {
     }
 
     /// Sets the split memo.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `memo` contains a null byte.
     pub fn set_memo(&self, memo: &str) {
         let c_memo = CString::new(memo).unwrap();
         unsafe { ffi::xaccSplitSetMemo(self.ptr.as_ptr(), c_memo.as_ptr()) }
@@ -142,6 +146,10 @@ impl Split {
     }
 
     /// Sets the split action.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `action` contains a null byte.
     pub fn set_action(&self, action: &str) {
         let c_action = CString::new(action).unwrap();
         unsafe { ffi::xaccSplitSetAction(self.ptr.as_ptr(), c_action.as_ptr()) }
@@ -355,6 +363,20 @@ impl std::fmt::Debug for Split {
             .field("value", &self.value())
             .field("reconcile", &self.reconcile_state())
             .finish()
+    }
+}
+
+impl PartialEq for Split {
+    fn eq(&self, other: &Self) -> bool {
+        self.guid() == other.guid()
+    }
+}
+
+impl Eq for Split {}
+
+impl std::hash::Hash for Split {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.guid().hash(state);
     }
 }
 

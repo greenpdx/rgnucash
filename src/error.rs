@@ -1,4 +1,22 @@
 //! Error types for gnucash-sys.
+//!
+//! This module provides error handling for GnuCash operations.
+//!
+//! # Examples
+//!
+//! ```
+//! use gnucash_sys::{Error, Result};
+//!
+//! fn process_data() -> Result<()> {
+//!     // Operations that might fail return Result<T, Error>
+//!     Err(Error::InvalidOperation("example error".to_string()))
+//! }
+//!
+//! match process_data() {
+//!     Ok(()) => println!("Success"),
+//!     Err(e) => println!("Error: {}", e),
+//! }
+//! ```
 
 use std::fmt;
 

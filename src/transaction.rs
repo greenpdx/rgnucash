@@ -182,24 +182,40 @@ impl Transaction {
     // ==================== Setters ====================
 
     /// Sets the transaction description.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `desc` contains a null byte.
     pub fn set_description(&self, desc: &str) {
         let c_desc = CString::new(desc).unwrap();
         unsafe { ffi::xaccTransSetDescription(self.ptr.as_ptr(), c_desc.as_ptr()) }
     }
 
     /// Sets the transaction number (ID).
+    ///
+    /// # Panics
+    ///
+    /// Panics if `num` contains a null byte.
     pub fn set_num(&self, num: &str) {
         let c_num = CString::new(num).unwrap();
         unsafe { ffi::xaccTransSetNum(self.ptr.as_ptr(), c_num.as_ptr()) }
     }
 
     /// Sets the transaction notes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `notes` contains a null byte.
     pub fn set_notes(&self, notes: &str) {
         let c_notes = CString::new(notes).unwrap();
         unsafe { ffi::xaccTransSetNotes(self.ptr.as_ptr(), c_notes.as_ptr()) }
     }
 
     /// Sets the document link URL.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `link` contains a null byte.
     pub fn set_doc_link(&self, link: &str) {
         let c_link = CString::new(link).unwrap();
         unsafe { ffi::xaccTransSetDocLink(self.ptr.as_ptr(), c_link.as_ptr()) }
@@ -216,6 +232,10 @@ impl Transaction {
     }
 
     /// Sets the read-only flag with a reason.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `reason` contains a null byte.
     pub fn set_read_only(&self, reason: &str) {
         let c_reason = CString::new(reason).unwrap();
         unsafe { ffi::xaccTransSetReadOnly(self.ptr.as_ptr(), c_reason.as_ptr()) }
@@ -328,6 +348,10 @@ impl Transaction {
     // ==================== Voiding ====================
 
     /// Voids the transaction with a reason.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `reason` contains a null byte.
     pub fn void(&self, reason: &str) {
         let c_reason = CString::new(reason).unwrap();
         unsafe { ffi::xaccTransVoid(self.ptr.as_ptr(), c_reason.as_ptr()) }
@@ -398,6 +422,20 @@ impl std::fmt::Debug for Transaction {
             .field("split_count", &self.split_count())
             .field("is_balanced", &self.is_balanced())
             .finish()
+    }
+}
+
+impl PartialEq for Transaction {
+    fn eq(&self, other: &Self) -> bool {
+        self.guid() == other.guid()
+    }
+}
+
+impl Eq for Transaction {}
+
+impl std::hash::Hash for Transaction {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.guid().hash(state);
     }
 }
 

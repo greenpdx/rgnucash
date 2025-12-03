@@ -130,12 +130,20 @@ impl Price {
     }
 
     /// Sets the price source from a string.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `source` contains a null byte.
     pub fn set_source_string(&self, source: &str) {
         let c_source = CString::new(source).unwrap();
         unsafe { ffi::gnc_price_set_source_string(self.ptr.as_ptr(), c_source.as_ptr()) }
     }
 
     /// Sets the price type string.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `type_str` contains a null byte.
     pub fn set_type_string(&self, type_str: &str) {
         let c_type = CString::new(type_str).unwrap();
         unsafe { ffi::gnc_price_set_typestr(self.ptr.as_ptr(), c_type.as_ptr()) }
@@ -172,6 +180,15 @@ impl PartialEq for Price {
 }
 
 impl Eq for Price {}
+
+impl std::hash::Hash for Price {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        // Hash by time and value since those define price identity
+        self.time().hash(state);
+        self.value().num().hash(state);
+        self.value().denom().hash(state);
+    }
+}
 
 /// A GnuCash PriceDB - a database of price quotes.
 pub struct PriceDB {
