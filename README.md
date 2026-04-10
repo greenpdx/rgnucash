@@ -25,9 +25,30 @@ This workspace provides Rust access to GnuCash's core accounting functionality:
 
 Install GnuCash development libraries:
 
+### Raspberry Pi OS
+```bash
+sudo apt install libgnucash-dev libglib2.0-dev
+```
+
+### Debian / Ubuntu (no libgnucash-dev available)
+Build GnuCash from source to get the headers and libraries:
+```bash
+
+sudo apt-get install gnucash
+sudo apt-get build-dep gnucash
+git clone https://github.com/Gnucash/gnucash.git
+cd gnucash && mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+make -j$(nproc) && sudo make install
+```
+Then set environment variables for the build:
+```bash
+export GNUCASH_LIB=/usr/local/lib
+export GNUCASH_INCLUDE=/usr/local/include/gnucash
+```
+
 **Debian/Ubuntu:**
 ```bash
-sudo apt install gnucash libgnucash-dev libglib2.0-dev
 ```
 
 **Fedora:**
