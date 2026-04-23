@@ -11,9 +11,11 @@
 //! - [`BillTerm`] - Payment terms
 //! - [`TaxTable`] - Tax rate table
 //! - [`Owner`] - Polymorphic owner (Customer, Vendor, Employee, or Job)
+//! - [`Commodity`] - Currency or security denomination
 
 pub mod address;
 pub mod billterm;
+pub mod commodity;
 pub mod customer;
 pub mod employee;
 pub mod entry;
@@ -25,6 +27,7 @@ pub mod vendor;
 
 pub use address::Address;
 pub use billterm::BillTerm;
+pub use commodity::Commodity;
 pub use customer::Customer;
 pub use employee::Employee;
 pub use entry::Entry;

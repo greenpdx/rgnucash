@@ -6,6 +6,8 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Account, Book, Guid, Split, Transaction};
 
+use crate::business::Invoice;
+
 /// Re-export query enums.
 pub use gnucash_sys::ffi::QofQueryOp;
 
@@ -120,6 +122,25 @@ impl Query {
                 let data = (*current).data as *mut ffi::Account;
                 if let Some(acct) = Account::from_raw(data, false) {
                     results.push(acct);
+                }
+                current = (*current).next;
+            }
+        }
+        results
+    }
+
+    /// Runs the query and returns results as invoices. Pair with
+    /// `set_search_for("gncInvoice")` (or `Query::for_type("gncInvoice")`)
+    /// and whatever predicate terms you need.
+    pub fn run_invoices(&self) -> Vec<Invoice> {
+        let list = self.run_raw();
+        let mut results = Vec::new();
+        let mut current = list;
+        while !current.is_null() {
+            unsafe {
+                let data = (*current).data as *mut ffi::GncInvoice;
+                if let Some(inv) = Invoice::from_raw(data, false) {
+                    results.push(inv);
                 }
                 current = (*current).next;
             }

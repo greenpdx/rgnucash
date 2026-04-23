@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Account, Book, Guid, Numeric, Transaction};
 
-use super::Owner;
+use super::{Commodity, Entry, Owner};
 
 pub use ffi::GncInvoiceType as InvoiceType;
 
@@ -216,6 +216,44 @@ impl Invoice {
     /// Removes an entry from this invoice.
     pub fn remove_entry(&self, entry: &super::Entry) {
         unsafe { ffi::gncInvoiceRemoveEntry(self.ptr.as_ptr(), entry.as_ptr()) }
+    }
+
+    /// Returns all entries attached to this invoice, in the order
+    /// GnuCash stores them (the same order the GUI and PDF rendering
+    /// use).
+    pub fn entries(&self) -> Vec<Entry> {
+        let mut result = Vec::new();
+        unsafe {
+            let mut current = ffi::gncInvoiceGetEntries(self.ptr.as_ptr()) as *mut ffi::GList;
+            while !current.is_null() {
+                let entry_ptr = (*current).data as *mut ffi::GncEntry;
+                if let Some(entry) = Entry::from_raw(entry_ptr, false) {
+                    result.push(entry);
+                }
+                current = (*current).next;
+            }
+        }
+        result
+    }
+
+    /// Returns the book this invoice belongs to, or `None` if the
+    /// invoice has been detached from any book.
+    pub fn book(&self) -> Option<Book> {
+        unsafe {
+            let instance = self.ptr.as_ptr() as ffi::gconstpointer;
+            let book_ptr = ffi::qof_instance_get_book(instance);
+            Book::from_raw(book_ptr, false)
+        }
+    }
+
+    /// Returns the currency (commodity) in which this invoice is
+    /// denominated. `None` only if the invoice has not been given a
+    /// currency yet.
+    pub fn currency(&self) -> Option<Commodity> {
+        unsafe {
+            let ptr = ffi::gncInvoiceGetCurrency(self.ptr.as_ptr());
+            Commodity::from_raw(ptr, false)
+        }
     }
 
 }
