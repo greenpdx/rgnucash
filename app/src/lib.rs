@@ -24,6 +24,12 @@ pub mod builder;
 /// Business entities (Customer, Vendor, Employee, Invoice, etc.).
 pub mod business;
 
+/// Extension traits adding commodity-handling methods to
+/// `gnucash_sys::Book` / `gnucash_sys::Account`.
+pub mod engine_ext;
+
+pub use engine_ext::{AccountExt, BookExt};
+
 // Re-export commonly used types from gnucash-sys
 pub use gnucash_sys::{
     init_engine, is_engine_initialized, Account, Book, Error, GNCAccountType, Guid, Numeric,
@@ -41,6 +47,6 @@ pub use builder::{InvoiceBuilder, TransactionBuilder};
 
 // Re-export business entities
 pub use business::{
-    Address, BillTerm, Customer, Employee, Entry, Invoice, Job, Owner, OwnerType, TaxTable,
-    TaxTableEntry, TypedOwner, Vendor,
+    Address, BillTerm, Commodity, CommodityTable, Customer, Employee, Entry, Invoice, Job, Owner,
+    OwnerType, TaxTable, TaxTableEntry, TypedOwner, Vendor,
 };
