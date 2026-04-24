@@ -27,7 +27,7 @@ pub mod vendor;
 
 pub use address::Address;
 pub use billterm::BillTerm;
-pub use commodity::Commodity;
+pub use commodity::{Commodity, CommodityTable};
 pub use customer::Customer;
 pub use employee::Employee;
 pub use entry::Entry;

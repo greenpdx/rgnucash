@@ -256,6 +256,52 @@ impl Invoice {
         }
     }
 
+    /// Post the invoice to an A/R (or A/P, for bills) account,
+    /// creating the posted transaction and flipping [`is_posted`] to
+    /// `true`.
+    ///
+    /// * `post_date` and `due_date` are `time64` seconds-since-epoch
+    ///   values — pair with `gnc_time()` (for "now") or a chrono
+    ///   timestamp's `timestamp()`.
+    /// * `memo` lands on the posted transaction's description.
+    /// * `accumulate_splits`: collapse multiple entries that share an
+    ///   income/expense account into a single split per account.
+    /// * `auto_pay`: if credits are available on the customer/vendor,
+    ///   apply them to this invoice automatically.
+    ///
+    /// Returns the generated `Transaction` on success. `None` indicates
+    /// libgnucash refused to post — typically because the A/R account
+    /// has no commodity set, or because the invoice has no entries,
+    /// or because posting is already in progress.
+    ///
+    /// [`is_posted`]: Self::is_posted
+    pub fn post_to_account(
+        &self,
+        account: &Account,
+        post_date: i64,
+        due_date: i64,
+        memo: &str,
+        accumulate_splits: bool,
+        auto_pay: bool,
+    ) -> Option<Transaction> {
+        let c_memo = match CString::new(memo) {
+            Ok(c) => c,
+            Err(_) => return None,
+        };
+        unsafe {
+            let txn = ffi::gncInvoicePostToAccount(
+                self.ptr.as_ptr(),
+                account.as_ptr(),
+                post_date,
+                due_date,
+                c_memo.as_ptr(),
+                if accumulate_splits { 1 } else { 0 },
+                if auto_pay { 1 } else { 0 },
+            );
+            Transaction::from_raw(txn, false)
+        }
+    }
+
 }
 
 impl std::fmt::Debug for Invoice {

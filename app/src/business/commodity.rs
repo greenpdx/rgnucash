@@ -9,10 +9,11 @@
 //! covers for the fields most callers need (mnemonic, namespace,
 //! fullname, fraction).
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::ptr::NonNull;
 
 use gnucash_sys::ffi;
+use gnucash_sys::Book;
 
 /// A GnuCash commodity — currency, security, or other tradable unit.
 pub struct Commodity {
@@ -30,6 +31,39 @@ impl Commodity {
     /// The pointer must be valid and point to a live `gnc_commodity`.
     pub unsafe fn from_raw(ptr: *mut ffi::gnc_commodity, owned: bool) -> Option<Self> {
         NonNull::new(ptr).map(|ptr| Self { ptr, owned })
+    }
+
+    /// Construct a new commodity. The most common use is creating a
+    /// currency entry for a book that's being built from scratch —
+    /// `Commodity::new(&book, "Costa Rican Colón", "CURRENCY", "CRC", None, 100)`.
+    ///
+    /// The resulting commodity is not registered with the book's
+    /// commodity table; pair with [`CommodityTable::insert`] when you
+    /// want it looked up by namespace/mnemonic later.
+    pub fn new(
+        book: &Book,
+        fullname: &str,
+        namespace: &str,
+        mnemonic: &str,
+        cusip: Option<&str>,
+        fraction: i32,
+    ) -> Option<Self> {
+        let c_fullname = CString::new(fullname).ok()?;
+        let c_namespace = CString::new(namespace).ok()?;
+        let c_mnemonic = CString::new(mnemonic).ok()?;
+        let c_cusip = cusip.and_then(|s| CString::new(s).ok());
+        let cusip_ptr = c_cusip.as_ref().map_or(std::ptr::null(), |c| c.as_ptr());
+        unsafe {
+            let ptr = ffi::gnc_commodity_new(
+                book.as_ptr(),
+                c_fullname.as_ptr(),
+                c_namespace.as_ptr(),
+                c_mnemonic.as_ptr(),
+                cusip_ptr,
+                fraction,
+            );
+            Self::from_raw(ptr, true)
+        }
     }
 
     /// Returns the raw pointer.
@@ -112,6 +146,62 @@ impl std::fmt::Debug for Commodity {
             .field("namespace", &self.namespace())
             .field("mnemonic", &self.mnemonic())
             .field("fraction", &self.fraction())
+            .finish()
+    }
+}
+
+/// The commodity table attached to a `Book`. Exactly one per book;
+/// created lazily on first access via `gnc_commodity_table_get_table`.
+/// Used to register currencies and securities so later lookups by
+/// (namespace, mnemonic) succeed.
+pub struct CommodityTable {
+    ptr: NonNull<ffi::gnc_commodity_table>,
+}
+
+unsafe impl Send for CommodityTable {}
+
+impl CommodityTable {
+    /// # Safety
+    /// Pointer must be valid.
+    pub unsafe fn from_raw(ptr: *mut ffi::gnc_commodity_table) -> Option<Self> {
+        NonNull::new(ptr).map(|ptr| Self { ptr })
+    }
+
+    pub fn as_ptr(&self) -> *mut ffi::gnc_commodity_table {
+        self.ptr.as_ptr()
+    }
+
+    /// Look up a commodity by namespace + mnemonic. Returns `None` if
+    /// the table doesn't contain a matching entry.
+    pub fn lookup(&self, namespace: &str, mnemonic: &str) -> Option<Commodity> {
+        let c_ns = CString::new(namespace).ok()?;
+        let c_mn = CString::new(mnemonic).ok()?;
+        unsafe {
+            let ptr = ffi::gnc_commodity_table_lookup(
+                self.ptr.as_ptr(),
+                c_ns.as_ptr(),
+                c_mn.as_ptr(),
+            );
+            Commodity::from_raw(ptr, false)
+        }
+    }
+
+    /// Insert a commodity into the table. If an equivalent entry is
+    /// already present libgnucash returns the existing one and
+    /// leaves the freshly-constructed commodity up to the GC; the
+    /// returned `Commodity` is the authoritative table entry.
+    pub fn insert(&self, commodity: &Commodity) -> Option<Commodity> {
+        unsafe {
+            let ptr = ffi::gnc_commodity_table_insert(self.ptr.as_ptr(), commodity.as_ptr());
+            Commodity::from_raw(ptr, false)
+        }
+    }
+}
+
+impl std::fmt::Debug for CommodityTable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CommodityTable")
+            .field("ptr", &self.ptr.as_ptr())
             .finish()
     }
 }
