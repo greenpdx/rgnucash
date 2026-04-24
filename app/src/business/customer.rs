@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Book, Guid, Numeric};
 
-use super::{Address, Owner};
+use super::{Address, Commodity, Owner};
 
 /// A customer entity.
 pub struct Customer {
@@ -172,6 +172,13 @@ impl Customer {
     /// Sets the active flag.
     pub fn set_active(&self, active: bool) {
         unsafe { ffi::gncCustomerSetActive(self.ptr.as_ptr(), active as i32) }
+    }
+
+    /// Sets the customer's default currency. Invoices opened against
+    /// this customer inherit this currency, which is required for
+    /// `Invoice::post_to_account` to succeed.
+    pub fn set_currency(&self, currency: &Commodity) {
+        unsafe { ffi::gncCustomerSetCurrency(self.ptr.as_ptr(), currency.as_ptr()) }
     }
 
 }

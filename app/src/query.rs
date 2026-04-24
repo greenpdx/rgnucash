@@ -1,5 +1,6 @@
 //! Safe wrapper for QofQuery - the GnuCash query framework.
 
+use std::cell::RefCell;
 use std::ffi::CString;
 use std::ptr::NonNull;
 
@@ -12,8 +13,19 @@ use crate::business::Invoice;
 pub use gnucash_sys::ffi::QofQueryOp;
 
 /// A query for searching GnuCash objects.
+///
+/// `set_search_for` needs to outlive the FFI call — libgnucash's
+/// `qof_query_search_for` stores the type-name pointer it's given
+/// rather than copying it, so the `CString` backing that pointer must
+/// stay alive as long as the `Query` is alive. We keep it in a
+/// `RefCell<Option<CString>>` field so the public `&self` setter can
+/// swap it out when the search target changes.
 pub struct Query {
     ptr: NonNull<ffi::QofQuery>,
+    // Interior mutability: set_search_for takes &self (matches the
+    // existing API), so we need RefCell to swap the kept-alive
+    // type name. Query isn't Sync anyway.
+    search_type: RefCell<Option<CString>>,
 }
 
 unsafe impl Send for Query {}
@@ -24,6 +36,7 @@ impl Query {
         let ptr = unsafe { ffi::qof_query_create() };
         Self {
             ptr: NonNull::new(ptr).expect("qof_query_create returned null"),
+            search_type: RefCell::new(None),
         }
     }
 
@@ -39,7 +52,10 @@ impl Query {
     /// # Safety
     /// The pointer must be valid.
     pub unsafe fn from_raw(ptr: *mut ffi::QofQuery) -> Option<Self> {
-        NonNull::new(ptr).map(|ptr| Self { ptr })
+        NonNull::new(ptr).map(|ptr| Self {
+            ptr,
+            search_type: RefCell::new(None),
+        })
     }
 
     /// Returns the raw pointer.
@@ -47,10 +63,18 @@ impl Query {
         self.ptr.as_ptr()
     }
 
-    /// Sets the object type to search for.
+    /// Sets the object type to search for. The type name string is
+    /// stored inside the `Query` so libgnucash's retained pointer
+    /// remains valid for the query's lifetime.
     pub fn set_search_for(&self, obj_type: &str) {
-        let c_type = CString::new(obj_type).unwrap();
-        unsafe { ffi::qof_query_search_for(self.ptr.as_ptr(), c_type.as_ptr()) }
+        let c_type = CString::new(obj_type).expect("obj_type contains a NUL byte");
+        unsafe {
+            ffi::qof_query_search_for(self.ptr.as_ptr(), c_type.as_ptr());
+        }
+        // Store after the FFI call — libgnucash's internal pointer now
+        // references c_type's buffer; dropping any previous CString
+        // via replace() is safe because libgnucash isn't using it.
+        self.search_type.replace(Some(c_type));
     }
 
     /// Sets the book to search in.
