@@ -206,6 +206,13 @@ impl Invoice {
         unsafe { ffi::gncInvoiceSetDateOpened(self.ptr.as_ptr(), date) }
     }
 
+    /// Sets the currency for this invoice. Required before posting;
+    /// `Invoice::post_to_account` will otherwise refuse to create the
+    /// posted transaction.
+    pub fn set_currency(&self, currency: &Commodity) {
+        unsafe { ffi::gncInvoiceSetCurrency(self.ptr.as_ptr(), currency.as_ptr()) }
+    }
+
     // ==================== Entry Management ====================
 
     /// Adds an entry to this invoice.
