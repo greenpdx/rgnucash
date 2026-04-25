@@ -1,3 +1,9 @@
+rgnucash (0.1.9) unstable; urgency=medium
+
+  * .gitignore,Makefile,docker/libgnucash/Containerfile,docker/libgnucash/README.md,docker/libgnucash/build-in-container.sh
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 19:40:47 +0100
+
 rgnucash (0.1.8) unstable; urgency=medium
 
   * src/split.rs,src/transaction.rs
