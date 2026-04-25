@@ -4,6 +4,8 @@
 //!
 //! Based on: gnucash/bindings/python/example_scripts/simple_business_create.py
 
+use gnucash_ext::business::billterm::{BillTerm, BillTermType};
+use gnucash_ext::business::tax::{AmountType, DiscountHow};
 use gnucash_ext::{
     init_engine, Book, Customer, Employee, Entry, GNCAccountType, Invoice, Job, Numeric, Vendor,
 };
@@ -23,14 +25,29 @@ fn main() {
     root.commit_edit();
     book.set_root_account(&root);
 
+    // Create a bill term (Net 30) — used by both customer + invoice
+    // below to demonstrate the new set_terms wrappers.
+    println!("Creating bill term (Net 30)...");
+    let net30 = BillTerm::new(&book);
+    net30.begin_edit();
+    net30.set_name("Net 30");
+    net30.set_description("Payment due in 30 days");
+    net30.set_type(BillTermType::GNC_TERM_TYPE_DAYS);
+    net30.set_due_days(30);
+    net30.commit_edit();
+
     // Create a customer
-    println!("Creating customer...");
+    println!("\nCreating customer...");
     let customer = Customer::new(&book);
     customer.begin_edit();
     customer.set_id("CUST001");
     customer.set_name("Acme Corporation");
     customer.set_notes("Our best customer");
     customer.set_active(true);
+    // Default this customer's invoices to Net-30 unless overridden.
+    customer.set_terms(&net30);
+    // (Also available: customer.set_tax_table(&t) +
+    //                  customer.set_tax_table_override(true).)
 
     // Set customer address
     if let Some(addr) = customer.addr() {
@@ -111,6 +128,13 @@ fn main() {
     // Set the invoice owner to the customer
     invoice.set_owner(&customer_owner);
 
+    // Demo the Invoice setters added in this gap-fill PR.
+    invoice.set_terms(&net30);
+    invoice.set_active(true);
+    invoice.set_doc_link("https://acme.example/po/2024-001.pdf");
+    // (Also available: invoice.set_is_credit_note(true) for an NC,
+    //                  invoice.set_bill_to(&other_owner).)
+
     invoice.commit_edit();
 
     // Add entries to the invoice
@@ -121,8 +145,16 @@ fn main() {
     entry1.set_description("Consulting - Day 1");
     entry1.set_quantity(Numeric::new(8, 1)); // 8 hours
     entry1.set_inv_price(Numeric::new(15000, 100)); // $150/hour
+    // 10% loyalty discount, applied to the price before tax — uses
+    // the Entry::set_inv_discount_type / _how setters added in this
+    // gap-fill PR. Without these, the discount would still apply but
+    // its interpretation (% vs absolute) and ordering (pre/post tax)
+    // would default to whatever the last edit on this entry chose.
+    entry1.set_inv_discount(Numeric::new(10, 1)); // 10
+    entry1.set_inv_discount_type(AmountType::GNC_AMT_TYPE_PERCENT);
+    entry1.set_inv_discount_how(DiscountHow::GNC_DISC_PRETAX);
     invoice.add_entry(&entry1);
-    println!("  Entry 1: Consulting - Day 1 (8 hrs @ $150)");
+    println!("  Entry 1: Consulting - Day 1 (8 hrs @ $150, 10% pretax discount)");
 
     let entry2 = Entry::new(&book);
     entry2.set_date(1704153600); // Jan 2, 2024
@@ -156,5 +188,6 @@ fn main() {
     std::mem::forget(customer);
     std::mem::forget(vendor);
     std::mem::forget(employee);
+    std::mem::forget(net30);
     std::mem::forget(root);
 }
