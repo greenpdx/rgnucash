@@ -1,6 +1,7 @@
 //! Safe wrapper for GnuCash Split.
 
 use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 use std::ptr::NonNull;
 
 use crate::ffi;
@@ -237,7 +238,8 @@ impl Split {
 
     /// Sets the reconcile state.
     pub fn set_reconcile_state(&self, state: char) {
-        unsafe { ffi::xaccSplitSetReconcile(self.ptr.as_ptr(), state as u8) }
+        // c_char is i8 on x86_64 / u8 on aarch64 — `as u8` would break on x86_64.
+        unsafe { ffi::xaccSplitSetReconcile(self.ptr.as_ptr(), state as c_char) }
     }
 
     /// Returns the date when this split was reconciled.

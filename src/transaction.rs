@@ -1,6 +1,7 @@
 //! Safe wrapper for GnuCash Transaction.
 
 use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
 use std::ptr::NonNull;
 
 use crate::ffi;
@@ -223,7 +224,8 @@ impl Transaction {
 
     /// Sets the transaction type.
     pub fn set_txn_type(&self, txn_type: char) {
-        unsafe { ffi::xaccTransSetTxnType(self.ptr.as_ptr(), txn_type as u8) }
+        // c_char is i8 on x86_64 / u8 on aarch64 — `as u8` would break on x86_64.
+        unsafe { ffi::xaccTransSetTxnType(self.ptr.as_ptr(), txn_type as c_char) }
     }
 
     /// Sets whether this is a closing transaction.
