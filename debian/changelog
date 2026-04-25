@@ -1,3 +1,9 @@
+rgnucash (0.1.5) unstable; urgency=medium
+
+  * app/src/business/invoice.rs
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 05:10:15 +0100
+
 rgnucash (0.1.4) unstable; urgency=medium
 
   * app/src/business/entry.rs,app/src/business/tax.rs
