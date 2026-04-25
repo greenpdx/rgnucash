@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Book, Guid, Numeric};
 
-use super::{Address, Commodity, Owner};
+use super::{Address, BillTerm, Commodity, Owner, TaxTable};
 
 /// A customer entity.
 pub struct Customer {
@@ -179,6 +179,38 @@ impl Customer {
     /// `Invoice::post_to_account` to succeed.
     pub fn set_currency(&self, currency: &Commodity) {
         unsafe { ffi::gncCustomerSetCurrency(self.ptr.as_ptr(), currency.as_ptr()) }
+    }
+
+    /// Sets the customer's default bill terms. Invoices opened
+    /// against this customer inherit these unless explicitly
+    /// overridden via [`Invoice::set_terms`].
+    ///
+    /// [`Invoice::set_terms`]: super::Invoice::set_terms
+    pub fn set_terms(&self, terms: &BillTerm) {
+        unsafe { ffi::gncCustomerSetTerms(self.ptr.as_ptr(), terms.as_ptr()) }
+    }
+
+    /// Sets the customer's default tax table. Has no effect unless
+    /// [`set_tax_table_override`] is also set to `true` — the
+    /// override flag is libgnucash's "use this table instead of the
+    /// per-line default" toggle.
+    ///
+    /// [`set_tax_table_override`]: Self::set_tax_table_override
+    pub fn set_tax_table(&self, table: &TaxTable) {
+        unsafe { ffi::gncCustomerSetTaxTable(self.ptr.as_ptr(), table.as_ptr()) }
+    }
+
+    /// Toggles whether [`set_tax_table`] takes precedence over the
+    /// per-line tax table on entries assigned to this customer.
+    ///
+    /// [`set_tax_table`]: Self::set_tax_table
+    pub fn set_tax_table_override(&self, override_default: bool) {
+        unsafe {
+            ffi::gncCustomerSetTaxTableOverride(
+                self.ptr.as_ptr(),
+                if override_default { 1 } else { 0 },
+            )
+        }
     }
 
 }

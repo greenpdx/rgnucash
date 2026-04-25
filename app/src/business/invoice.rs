@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Account, Book, Guid, Numeric, Transaction};
 
-use super::{Commodity, Entry, Owner};
+use super::{BillTerm, Commodity, Entry, Owner};
 
 pub use ffi::GncInvoiceType as InvoiceType;
 
@@ -211,6 +211,48 @@ impl Invoice {
     /// posted transaction.
     pub fn set_currency(&self, currency: &Commodity) {
         unsafe { ffi::gncInvoiceSetCurrency(self.ptr.as_ptr(), currency.as_ptr()) }
+    }
+
+    /// Sets the bill terms (net 30, due-on-receipt, etc.). Pulls
+    /// from the book's bill-term registry — use
+    /// [`BillTerm::lookup_by_name`] to resolve a name to a handle
+    /// first.
+    pub fn set_terms(&self, terms: &BillTerm) {
+        unsafe { ffi::gncInvoiceSetTerms(self.ptr.as_ptr(), terms.as_ptr()) }
+    }
+
+    /// Sets the active flag. Inactive invoices are hidden from the
+    /// default GUI invoice list.
+    pub fn set_active(&self, active: bool) {
+        unsafe { ffi::gncInvoiceSetActive(self.ptr.as_ptr(), if active { 1 } else { 0 }) }
+    }
+
+    /// Marks this invoice as a credit note rather than a regular
+    /// invoice. Credit-note posting flips the sign of the resulting
+    /// transaction. Set this before [`post_to_account`].
+    ///
+    /// [`post_to_account`]: Self::post_to_account
+    pub fn set_is_credit_note(&self, credit_note: bool) {
+        unsafe {
+            ffi::gncInvoiceSetIsCreditNote(
+                self.ptr.as_ptr(),
+                if credit_note { 1 } else { 0 },
+            )
+        }
+    }
+
+    /// Sets the bill-to owner — the third-party who actually pays
+    /// when the receiving customer is themselves billing through.
+    /// Most invoices leave this unset.
+    pub fn set_bill_to(&self, owner: &Owner) {
+        unsafe { ffi::gncInvoiceSetBillTo(self.ptr.as_ptr(), owner.as_ptr()) }
+    }
+
+    /// Sets the document link — a URL or filesystem path pointing
+    /// at supplemental paperwork (PO scan, contract, etc.).
+    pub fn set_doc_link(&self, link: &str) {
+        let c_link = CString::new(link).unwrap();
+        unsafe { ffi::gncInvoiceSetDocLink(self.ptr.as_ptr(), c_link.as_ptr()) }
     }
 
     // ==================== Entry Management ====================

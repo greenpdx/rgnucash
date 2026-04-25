@@ -7,6 +7,7 @@ use gnucash_sys::ffi;
 use gnucash_sys::{Account, Book, Guid, Numeric};
 
 pub use ffi::GncAmountType as AmountType;
+pub use ffi::GncDiscountHow as DiscountHow;
 
 /// A tax rate table.
 pub struct TaxTable {

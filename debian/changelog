@@ -1,3 +1,27 @@
+rgnucash (0.1.7) unstable; urgency=medium
+
+  * app/examples/simple_business.rs
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 05:20:50 +0100
+
+rgnucash (0.1.6) unstable; urgency=medium
+
+  * app/src/business/customer.rs
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 05:13:54 +0100
+
+rgnucash (0.1.5) unstable; urgency=medium
+
+  * app/src/business/invoice.rs
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 05:10:15 +0100
+
+rgnucash (0.1.4) unstable; urgency=medium
+
+  * app/src/business/entry.rs,app/src/business/tax.rs
+
+ -- Shaun Savage <savages@crmep.com>  Sat, 25 Apr 2026 05:03:51 +0100
+
 rgnucash (0.1.3) unstable; urgency=medium
 
   * .gitignore,app/Cargo.toml,debian/changelog,debian/control,debian/copyright

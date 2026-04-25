@@ -6,6 +6,7 @@ use std::ptr::NonNull;
 use gnucash_sys::ffi;
 use gnucash_sys::{Account, Book, Guid, Numeric};
 
+use super::tax::{AmountType, DiscountHow};
 use super::{Invoice, TaxTable};
 
 /// A line item in an invoice or bill.
@@ -206,6 +207,27 @@ impl Entry {
     /// Sets the invoice discount.
     pub fn set_inv_discount(&self, discount: Numeric) {
         unsafe { ffi::gncEntrySetInvDiscount(self.ptr.as_ptr(), discount.into()) }
+    }
+
+    /// Sets how the invoice discount value is interpreted —
+    /// `GNC_AMT_TYPE_VALUE` for an absolute currency amount,
+    /// `GNC_AMT_TYPE_PERCENT` for a percentage of the line subtotal.
+    /// Without this, libgnucash falls back to whatever default the
+    /// owning entry was last edited with, which can flip discount
+    /// semantics silently when an invoice is round-tripped through
+    /// the API.
+    pub fn set_inv_discount_type(&self, kind: AmountType) {
+        unsafe { ffi::gncEntrySetInvDiscountType(self.ptr.as_ptr(), kind) }
+    }
+
+    /// Sets when the invoice discount is applied relative to tax —
+    /// `PRETAX`, `SAMETIME`, or `POSTTAX`. Pairs with
+    /// [`set_inv_discount_type`] to fully describe the discount
+    /// behavior of a programmatically-built line.
+    ///
+    /// [`set_inv_discount_type`]: Self::set_inv_discount_type
+    pub fn set_inv_discount_how(&self, how: DiscountHow) {
+        unsafe { ffi::gncEntrySetInvDiscountHow(self.ptr.as_ptr(), how) }
     }
 
     /// Sets the invoice account.
