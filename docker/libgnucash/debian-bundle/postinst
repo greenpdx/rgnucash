@@ -1,0 +1,19 @@
+#!/bin/sh
+# Run ldconfig so /opt/libgnucash/lib appears in the dynamic-linker
+# cache. The triggers file already requests this on every install
+# under /opt/libgnucash/lib, but we also run it inline so dpkg's first
+# unpack works without waiting for trigger processing.
+
+set -e
+
+case "$1" in
+    configure)
+        # /opt is not on the default ldconfig path on Debian; we drop a
+        # config file under /etc/ld.so.conf.d/ at build time so this
+        # ldconfig pass picks it up.
+        ldconfig
+        ;;
+esac
+
+#DEBHELPER#
+exit 0

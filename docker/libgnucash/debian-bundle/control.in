@@ -1,0 +1,21 @@
+Package: libgnucash
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: Shaun Savage <savages@crmep.com>
+Section: libs
+Priority: optional
+Depends: @DEPENDS@
+Homepage: https://www.gnucash.org/
+Description: Engine-only libgnucash bundle under /opt/libgnucash/
+ Pre-built libgnucash engine (no GUI, no OFX, no AqBanking, no Python)
+ packaged for installation under /opt/libgnucash. Built from upstream
+ GnuCash source in an isolated container by the rgnucash repo's
+ docker/libgnucash/build.sh.
+ .
+ Exists because GnuCash upstream does not promise a stable C API and
+ no Debian/Ubuntu release ships libgnucash-dev. The rgnucash FFI
+ crate links against this at build time; downstream daemons (e.g.
+ crfactura) link against it at run time.
+ .
+ Coexists with the system gnucash desktop package — this one lives in
+ /opt/libgnucash/lib/, the desktop's engine in /usr/lib/<triplet>/.

@@ -1,0 +1,41 @@
+# Mirrors libgnucash/Containerfile — Debian trixie matches the host so
+# the compiled rgnucash artifact links against the same libc/libstdc++
+# the daemon will run with.
+FROM debian:trixie
+
+# Build deps for rgnucash:
+#   * cargo / rustc — the crate is a pure-Rust workspace with one C dep
+#   * libclang-dev  — bindgen needs libclang.so to parse wrapper.h
+#   * pkg-config + libglib2.0-dev — build.rs probes glib-2.0 via pkg-config
+#   * libxml2-dev   — gnucash headers transitively #include <libxml/...>
+#   * dpkg          — to install the bind-mounted libgnucash deb
+#                     into this container's filesystem at run time
+#   * zstd          — for the output tarball
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cargo rustc \
+        build-essential pkg-config \
+        libclang-dev clang \
+        libglib2.0-dev libxml2-dev \
+        zstd \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# /src is bind-mounted ro — bindgen + cargo write only into /work and
+# /out. CARGO_TARGET_DIR + CARGO_HOME point into the cache volume so
+# incremental builds across runs are fast.
+ENV CARGO_TARGET_DIR=/cache/target \
+    CARGO_HOME=/cache/cargo \
+    GNUCASH_LIB_PATH=/opt/libgnucash/lib \
+    GNUCASH_INCLUDE_PATH=/opt/libgnucash/include/gnucash
+
+COPY build-in-container.sh /usr/local/bin/build-in-container
+RUN chmod +x /usr/local/bin/build-in-container
+
+WORKDIR /work
+
+# Bind-mounts the wrapper provides:
+#   /src        ro   rgnucash source checkout (host-side git work-tree)
+#   /lgc-deb    ro   directory holding libgnucash_*.deb
+#   /cache      rw   named podman volume (cargo registry + target)
+#   /out        rw   where artifacts land on the host
+ENTRYPOINT ["/usr/local/bin/build-in-container"]
