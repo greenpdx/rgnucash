@@ -101,10 +101,19 @@ if [ ! -f "$artifact" ]; then
     exit 1
 fi
 
+deb=$(ls -t "$OUT"/rgnucash_*_"${ARCH}".deb 2>/dev/null | head -1 || true)
+if [ -z "$deb" ] || [ ! -f "$deb" ]; then
+    echo "build did not produce an rgnucash .deb in $OUT" >&2
+    exit 1
+fi
+
 echo
-echo "=== artifact ready ==="
+echo "=== artifacts ready ==="
 echo "  $artifact"
 du -h "$artifact"
+echo "  $deb"
+du -h "$deb"
 echo
 echo "Inspect contents:"
 echo "    tar --zstd -tf \"$artifact\" | head"
+echo "    dpkg -c \"$deb\" | head"

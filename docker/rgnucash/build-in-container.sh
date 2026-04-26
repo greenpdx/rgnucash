@@ -62,3 +62,18 @@ rm -rf "$out"
 
 echo "done: /out/$tarball"
 ls -lh "/out/$tarball"
+
+echo "--- dpkg-buildpackage (.deb) ---"
+# debian/rules' override_dh_auto_install reads from `target/release/`, but
+# CARGO_TARGET_DIR points at /cache/target. Symlink so the install step
+# resolves without a redundant rebuild path.
+ln -sfn /cache/target /work/target
+( cd /work && dpkg-buildpackage -us -uc -b )
+deb=$(ls /rgnucash_*_${ARCH}.deb 2>/dev/null | head -1 || true)
+if [ -z "$deb" ] || [ ! -f "$deb" ]; then
+    echo "dpkg-buildpackage did not produce a .deb" >&2
+    exit 1
+fi
+cp "$deb" /out/
+echo "done: /out/$(basename "$deb")"
+ls -lh "/out/$(basename "$deb")"

@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libclang-dev clang \
         libglib2.0-dev libxml2-dev \
         zstd \
+        debhelper devscripts fakeroot dpkg-dev \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

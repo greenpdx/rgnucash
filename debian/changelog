@@ -1,3 +1,9 @@
+rgnucash (0.1.10) unstable; urgency=medium
+
+  * debian/control,docker/rgnucash/Containerfile,docker/rgnucash/build-in-container.sh,docker/rgnucash/build.sh
+
+ -- Shaun Savage <savages@crmep.com>  Sun, 26 Apr 2026 20:26:41 +0100
+
 rgnucash (0.1.9) unstable; urgency=medium
 
   * .gitignore,Makefile,docker/libgnucash/Containerfile,docker/libgnucash/README.md,docker/libgnucash/build-in-container.sh
